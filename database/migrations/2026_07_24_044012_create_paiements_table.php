@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->decimal('montant', 10, 2);
             $table->enum('moyen_paiement', ['wave', 'orange_money', 'free_money', 'especes']);
             $table->string('reference_transaction', 100)->nullable()->unique();
-            $table->enum('statut_paiement', ['en_attente', 'confirme', 'echoue'])->index();
+            $table->enum('statut_paiement', ['en_attente', 'confirme', 'echoue'])->default('en_attente')->index();
             $table->dateTime('date_paiement');
             $table->timestamps();
         });

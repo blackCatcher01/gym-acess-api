@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RequestOtpRequest;
 use App\Http\Requests\Auth\VerifyOtpRequest;
+use App\Jobs\SendOtpJob;
 use App\Models\AuthOtp;
 use App\Models\LoginAttempt;
 use App\Models\Utilisateur;
@@ -20,7 +21,7 @@ class OtpController extends Controller
     {
         $data = $request->validated();
 
-        AuthOtp::create([
+        $otp = AuthOtp::create([
             'id_utilisateur' => Utilisateur::where('telephone', $data['telephone'])->value('id_utilisateur'),
             'telephone' => $data['telephone'],
             'otp_hash' => $this->otpService->hash($code = $this->otpService->generateCode()),
@@ -29,9 +30,14 @@ class OtpController extends Controller
             'expires_at' => now()->addMinutes(5),
         ]);
 
-        // Envoi réel via WhatsApp/SMS — service à brancher (Twilio, Infobip, etc.)
+        // Envoi réel via WhatsApp/SMS (Infobip) en file d'attente.
         // Ne jamais logger $code en clair en production.
-        // dispatch(new SendOtpNotification($data['telephone'], $code));
+        SendOtpJob::dispatch(
+            $otp->id_otp,
+            $data['telephone'],
+            $code,
+            config('services.otp_channel', 'sms'),
+        );
 
         return response()->json(['message' => 'Code envoyé.']);
     }
@@ -77,7 +83,11 @@ class OtpController extends Controller
             ['nom' => $data['nom'] ?? 'Nouvel utilisateur', 'type_utilisateur' => 'adherent', 'is_active' => true]
         );
 
-        $utilisateur->update(['last_login_at' => now()]);
+        // update() passe par $fillable, qui exclut volontairement last_login_at
+        // (c'est un champ que le client ne doit jamais pouvoir forcer) —
+        // forceFill() est donc nécessaire ici, c'est le seul endroit légitime
+        // où ce champ doit être écrit.
+        $utilisateur->forceFill(['last_login_at' => now()])->save();
 
         $token = $utilisateur->createToken('mobile')->plainTextToken;
 

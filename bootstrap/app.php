@@ -17,9 +17,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'verify.qr' => \App\Http\Middleware\VerifyQrToken::class,
             'verify.mobile-money' => \App\Http\Middleware\VerifyMobileMoneySignature::class,
         ]);
+
+        // Sans ca, un client qui n'envoie pas explicitement "Accept: application/json"
+        // sur une route api/* protegee declenche une tentative de redirection vers
+        // la route nommee "login" (inexistante ici, API pure) -> 500 au lieu d'un 401 propre.
+        $middleware->redirectGuestsTo(fn ($request) => $request->is('api/*') ? null : route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
-    })->create();
+    })
+    ->create();

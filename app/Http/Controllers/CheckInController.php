@@ -31,6 +31,7 @@ class CheckInController extends Controller
             'id_adherent' => $adherent->id_adherent,
             'id_salle' => $idSalle,
             'id_cours' => $idCours,
+            'date_heure_passage' => now(),
             'resultat' => $resultat,
             'motif_refus' => $motif,
         ]);

@@ -33,9 +33,14 @@ class MobileMoneyWebhookController extends Controller
         }
 
         DB::transaction(function () use ($paiement, $statut) {
-            $paiement->update([
+            // statut_paiement est volontairement hors $fillable pour empêcher
+            // un client de le forcer via une requête classique — le webhook,
+            // dont l'authenticité est garantie par la signature HMAC vérifiée
+            // en amont (middleware verify.mobile-money), est le seul endroit
+            // légitime pour le modifier, d'où le forceFill().
+            $paiement->forceFill([
                 'statut_paiement' => $statut === 'succes' ? 'confirme' : 'echoue',
-            ]);
+            ])->save();
 
             if ($statut === 'succes') {
                 $paiement->abonnement->update(['statut' => 'actif']);

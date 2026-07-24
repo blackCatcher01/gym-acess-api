@@ -20,6 +20,23 @@ class Adherent extends Model
         'date_inscription',
     ];
 
+    /**
+     * id_adherent (= id_utilisateur) est volontairement hors $fillable —
+     * un client ne doit jamais pouvoir choisir son propre ID. Mais ça veut
+     * aussi dire qu'un simple Adherent::create([...'id_adherent' => X]) ou
+     * ->update(['id_adherent' => X]) échoue SILENCIEUSEMENT (Laravel ignore
+     * l'attribut sans erreur). Passez toujours par cette méthode pour créer
+     * un Adherent, plutôt que par Adherent::create() directement.
+     */
+    public static function creerPourUtilisateur(Utilisateur $utilisateur, array $attributs): self
+    {
+        $adherent = new self($attributs);
+        $adherent->forceFill(['id_adherent' => $utilisateur->id_utilisateur]);
+        $adherent->save();
+
+        return $adherent;
+    }
+
     protected function casts(): array
     {
         return [

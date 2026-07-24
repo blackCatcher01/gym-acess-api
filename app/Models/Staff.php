@@ -20,6 +20,19 @@ class Staff extends Model
         'date_embauche',
     ];
 
+    /**
+     * Voir Adherent::creerPourUtilisateur() — même piège avec id_staff,
+     * volontairement hors $fillable.
+     */
+    public static function creerPourUtilisateur(Utilisateur $utilisateur, array $attributs): self
+    {
+        $staff = new self($attributs);
+        $staff->forceFill(['id_staff' => $utilisateur->id_utilisateur]);
+        $staff->save();
+
+        return $staff;
+    }
+
     protected function casts(): array
     {
         return [
