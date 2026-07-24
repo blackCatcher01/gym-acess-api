@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    'wave' => [
+        'webhook_secret' => env('WAVE_WEBHOOK_SECRET'),
+    ],
+
+    'orange_money' => [
+        'webhook_secret' => env('ORANGE_MONEY_WEBHOOK_SECRET'),
+    ],
+
+    'mtn_money' => [
+        'webhook_secret' => env('MTN_MONEY_WEBHOOK_SECRET'),
+    ],
+    
+    'moov_money' => [
+        'webhook_secret' => env('MOOV_MONEY_WEBHOOK_SECRET'),
+    ],
 ];

@@ -13,10 +13,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'verify.qr' => \App\Http\Middleware\VerifyQrToken::class,
+            'verify.mobile-money' => \App\Http\Middleware\VerifyMobileMoneySignature::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
     })->create();
+    $middleware->alias([
+        'verify.qr' => \App\Http\Middleware\VerifyQrToken::class,
+        'verify.mobile-money' => \App\Http\Middleware\VerifyMobileMoneySignature::class,
+    ]);
