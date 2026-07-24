@@ -23,7 +23,3 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*'),
         );
     })->create();
-    $middleware->alias([
-        'verify.qr' => \App\Http\Middleware\VerifyQrToken::class,
-        'verify.mobile-money' => \App\Http\Middleware\VerifyMobileMoneySignature::class,
-    ]);

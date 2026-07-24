@@ -35,6 +35,12 @@ return [
         ],
     ],
 
+    // Ces trois clés doivent rester synchronisées avec l'ENUM moyen_paiement
+    // de la table paiements (migration create_paiements_table) et avec le
+    // cahier des charges (section 5.2). Si un nouvel opérateur est ajouté,
+    // il faut modifier les DEUX (migration + ce fichier), sinon le webhook
+    // recevra un secret introuvable (500) ou un paiement en base rejeté par
+    // la contrainte ENUM.
     'wave' => [
         'webhook_secret' => env('WAVE_WEBHOOK_SECRET'),
     ],
@@ -43,11 +49,7 @@ return [
         'webhook_secret' => env('ORANGE_MONEY_WEBHOOK_SECRET'),
     ],
 
-    'mtn_money' => [
-        'webhook_secret' => env('MTN_MONEY_WEBHOOK_SECRET'),
-    ],
-    
-    'moov_money' => [
-        'webhook_secret' => env('MOOV_MONEY_WEBHOOK_SECRET'),
+    'free_money' => [
+        'webhook_secret' => env('FREE_MONEY_WEBHOOK_SECRET'),
     ],
 ];
