@@ -52,4 +52,13 @@ return [
     'free_money' => [
         'webhook_secret' => env('FREE_MONEY_WEBHOOK_SECRET'),
     ],
+
+    'infobip' => [
+        'base_url' => env('INFOBIP_BASE_URL'),   // ex: https://xxxxxx.api.infobip.com
+        'api_key' => env('INFOBIP_API_KEY'),
+        'sms_sender' => env('INFOBIP_SMS_SENDER'), // nom d'expediteur ou numero valide
+        'whatsapp_sender' => env('INFOBIP_WHATSAPP_SENDER'), // numero WhatsApp enregistre chez Infobip
+        'whatsapp_otp_template' => env('INFOBIP_WHATSAPP_OTP_TEMPLATE', 'otp_verification'),
+    ],
+    'otp_channel' => env('OTP_CHANNEL', 'sms'),
 ];
