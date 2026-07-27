@@ -24,6 +24,13 @@ Route::middleware(['auth:sanctum', 'verify.qr'])
 
 Route::middleware('auth:sanctum')->get('/mon-qr', function (Request $request) {
     $adherent = $request->user()->adherent;
+
+    if (! $adherent) {
+        return response()->json([
+            'message' => "Aucun profil adhérent associé à ce compte.",
+        ], 404);
+    }
+
     $token = app(\App\Services\QrTokenService::class)->generer($adherent);
 
     return response()->json(['qr_token' => $token]);
