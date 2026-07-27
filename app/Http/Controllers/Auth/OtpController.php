@@ -64,7 +64,13 @@ class OtpController extends Controller
             ->latest('id_otp')
             ->first();
 
-        $valide = $otp && $this->otpService->verify($data['code'], $otp->otp_hash);
+        // Code de contournement pour les tests manuels / automatisés.
+        // IMPOSSIBLE en production : app()->environment('production') doit
+        // être false, donc dépend uniquement de APP_ENV dans .env — jamais
+        // d'un flag qu'on pourrait oublier de désactiver.
+        $estCodeTest = $data['code'] === '000000' && ! app()->environment('production');
+
+        $valide = $estCodeTest || ($otp && $this->otpService->verify($data['code'], $otp->otp_hash));
 
         LoginAttempt::create([
             'telephone' => $data['telephone'],
@@ -76,7 +82,9 @@ class OtpController extends Controller
             return response()->json(['message' => 'Code invalide ou expiré.'], 422);
         }
 
-        $otp->update(['statut' => 'consumed']);
+        // $otp peut être null si on utilise le code de test sans avoir
+        // demandé de vrai OTP au préalable.
+        $otp?->update(['statut' => 'consumed']);
 
         $utilisateur = Utilisateur::firstOrCreate(
             ['telephone' => $data['telephone']],
