@@ -19,9 +19,14 @@ class Salle extends Model
         'telephone_contact',
     ];
 
+    /**
+     * Adherents ayant un abonnement (actif ou passe) dans cette salle —
+     * plus de colonne id_salle directe sur adherents depuis la Phase 1
+     * (un adherent n'appartient plus a une seule salle fixe).
+     */
     public function adherents()
     {
-        return $this->hasMany(Adherent::class, 'id_salle', 'id_salle');
+        return Adherent::whereHas('abonnements.formule', fn ($q) => $q->where('id_salle', $this->id_salle));
     }
 
     public function staff()
