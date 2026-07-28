@@ -109,6 +109,9 @@ class OtpController extends Controller
         return response()->json([
             'token' => $token,
             'utilisateur' => $utilisateur,
+            // Necessaire cote admin web pour filtrer les menus reserves
+            // (Marketplace, Bannieres) au super_admin.
+            'roles' => $utilisateur->getRoleNames(),
         ]);
     }
 
