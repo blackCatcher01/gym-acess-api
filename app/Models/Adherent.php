@@ -15,8 +15,6 @@ class Adherent extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_salle',
-        'qr_token',
         'date_inscription',
     ];
 
@@ -28,9 +26,9 @@ class Adherent extends Model
      * l'attribut sans erreur). Passez toujours par cette méthode pour créer
      * un Adherent, plutôt que par Adherent::create() directement.
      */
-    public static function creerPourUtilisateur(Utilisateur $utilisateur, array $attributs): self
+    public static function creerPourUtilisateur(Utilisateur $utilisateur, array $attributs = []): self
     {
-        $adherent = new self($attributs);
+        $adherent = new self(array_merge(['date_inscription' => now()], $attributs));
         $adherent->forceFill(['id_adherent' => $utilisateur->id_utilisateur]);
         $adherent->save();
 
@@ -49,14 +47,24 @@ class Adherent extends Model
         return $this->belongsTo(Utilisateur::class, 'id_adherent', 'id_utilisateur');
     }
 
-    public function salle()
-    {
-        return $this->belongsTo(Salle::class, 'id_salle', 'id_salle');
-    }
-
     public function abonnements()
     {
         return $this->hasMany(Abonnement::class, 'id_adherent', 'id_adherent');
+    }
+
+    /**
+     * Salles où l'adhérent a (ou a eu) un abonnement — plus de salle
+     * unique, potentiellement plusieurs en simultané (multi-salles).
+     */
+    public function salles()
+    {
+        return Salle::whereIn(
+            'id_salle',
+            FormuleAbonnement::whereIn(
+                'id_formule',
+                $this->abonnements()->pluck('id_formule')
+            )->pluck('id_salle')
+        )->get();
     }
 
     public function reservations()

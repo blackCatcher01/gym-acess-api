@@ -91,6 +91,13 @@ class OtpController extends Controller
             ['nom' => $data['nom'] ?? 'Nouvel utilisateur', 'type_utilisateur' => 'adherent', 'is_active' => true]
         );
 
+        // firstOrCreate(), sur la branche "création", n'hydrate en mémoire
+        // que les attributs explicitement fournis (pas un vrai SELECT *) —
+        // sans ce refresh(), les colonnes comme profil_complete seraient
+        // carrément absentes du JSON (pas juste null) pour un tout nouvel
+        // utilisateur, ce qui casserait le parsing côté app mobile.
+        $utilisateur->refresh();
+
         // update() passe par $fillable, qui exclut volontairement last_login_at
         // (c'est un champ que le client ne doit jamais pouvoir forcer) —
         // forceFill() est donc nécessaire ici, c'est le seul endroit légitime

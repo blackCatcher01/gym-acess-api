@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\ProfilController;
+use App\Http\Controllers\QrController;
 use App\Http\Controllers\Webhooks\MobileMoneyWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -22,18 +24,14 @@ Route::middleware('throttle:otp')->group(function () {
 Route::middleware(['auth:sanctum', 'verify.qr'])
     ->post('/checkin', [CheckInController::class, 'scan']);
 
-Route::middleware('auth:sanctum')->get('/mon-qr', function (Request $request) {
-    $adherent = $request->user()->adherent;
+Route::middleware('auth:sanctum')->group(function () {
+    // Un QR par abonnement actif (un adherent peut etre abonne a
+    // plusieurs salles en simultane).
+    Route::get('/mes-qr', [QrController::class, 'mesCodes']);
 
-    if (! $adherent) {
-        return response()->json([
-            'message' => "Aucun profil adhérent associé à ce compte.",
-        ], 404);
-    }
-
-    $token = app(\App\Services\QrTokenService::class)->generer($adherent);
-
-    return response()->json(['qr_token' => $token]);
+    // Onboarding : complétion du profil + création du profil Adherent.
+    Route::patch('/mon-profil', [ProfilController::class, 'completer']);
+    Route::get('/centres-interet', [ProfilController::class, 'centresInteretDisponibles']);
 });
 
 Route::middleware('verify.mobile-money')

@@ -19,14 +19,14 @@ class VerifyQrToken
             return response()->json(['message' => 'qr_token manquant.'], 422);
         }
 
-        $adherent = $this->qrTokenService->valider($token);
+        $abonnement = $this->qrTokenService->valider($token);
 
-        if (! $adherent) {
+        if (! $abonnement) {
             return response()->json(['message' => 'QR code invalide, expiré ou déjà utilisé.'], 401);
         }
 
         // Rendu disponible au contrôleur sans re-décoder le token.
-        $request->attributes->set('adherent_scanne', $adherent);
+        $request->attributes->set('abonnement_scanne', $abonnement);
 
         return $next($request);
     }
