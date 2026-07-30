@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->foreignId('id_utilisateur')->constrained('utilisateurs', 'id_utilisateur')->cascadeOnDelete();
             $table->foreignId('id_centre_interet')->constrained('centres_interet', 'id_centre_interet')->cascadeOnDelete();
             $table->timestamps();
-            $table->unique(['id_utilisateur', 'id_centre_interet']);
+            $table->unique(['id_utilisateur', 'id_centre_interet'], 'uci_utilisateur_centre_unique');
         });
     }
 

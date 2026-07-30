@@ -9,6 +9,7 @@ return new class extends Migration {
         Schema::create('utilisateurs', function (Blueprint $table) {
             $table->id('id_utilisateur');
             $table->string('nom', 100);
+            $table->string('prenom', 100);
             $table->string('telephone', 20)->unique();
             $table->string('email', 150)->nullable()->unique();
             $table->string('mot_de_passe_hash', 255)->nullable();

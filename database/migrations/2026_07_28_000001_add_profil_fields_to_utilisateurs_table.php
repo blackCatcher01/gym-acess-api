@@ -7,13 +7,9 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('utilisateurs', function (Blueprint $table) {
-            $table->string('prenom', 100)->nullable()->after('nom');
             $table->date('date_naissance')->nullable()->after('email');
             $table->enum('sexe', ['homme', 'femme', 'autre'])->nullable()->after('date_naissance');
             $table->string('comment_connu', 100)->nullable()->after('sexe');
-            // Contrôlé uniquement par ProfilController::completer, jamais
-            // par mass-assignment client direct (meme principe que
-            // statut_paiement / last_login_at : voir lecons de la Phase precedente).
             $table->boolean('profil_complete')->default(false)->after('is_active');
         });
     }
@@ -21,7 +17,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('utilisateurs', function (Blueprint $table) {
-            $table->dropColumn(['prenom', 'date_naissance', 'sexe', 'comment_connu', 'profil_complete']);
+            $table->dropColumn(['date_naissance', 'sexe', 'comment_connu', 'profil_complete']);
         });
     }
 };

@@ -18,6 +18,7 @@ class VerifyOtpRequest extends FormRequest
             'code' => ['required', 'digits:6'],
             'purpose' => ['sometimes', 'in:login,reset,verify_phone'],
             'nom' => ['sometimes', 'string', 'max:100'],
+            'prenom' => ['sometimes', 'string', 'max:100'],
         ];
     }
 }

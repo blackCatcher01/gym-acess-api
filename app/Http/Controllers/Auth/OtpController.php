@@ -88,7 +88,12 @@ class OtpController extends Controller
 
         $utilisateur = Utilisateur::firstOrCreate(
             ['telephone' => $data['telephone']],
-            ['nom' => $data['nom'] ?? 'Nouvel utilisateur', 'type_utilisateur' => 'adherent', 'is_active' => true]
+            [
+                'nom' => $data['nom'] ?? 'Nouvel utilisateur',
+                'prenom' => $data['prenom'] ?? '',
+                'type_utilisateur' => 'adherent',
+                'is_active' => true,
+            ]
         );
 
         // firstOrCreate(), sur la branche "création", n'hydrate en mémoire
