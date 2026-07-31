@@ -103,4 +103,47 @@ class AbonnementAdminController extends Controller
             'paiement' => $paiement,
         ], 201);
     }
+
+    /**
+     * Liste des abonnements de la salle du staff connecté (toutes salles
+     * pour le super_admin) — utilisé par AbonnementsView.vue.
+     */
+    public function index(Request $request)
+    {
+        abort_unless($request->user()->hasAnyRole(['coach', 'gerant', 'super_admin']), 403);
+        $staff = $request->user()->staff;
+
+        $abonnements = \App\Models\Abonnement::query()
+            ->with(['adherent.utilisateur', 'formule.salle'])
+            ->when(! $request->user()->hasRole('super_admin'), function ($q) use ($staff) {
+                $q->whereHas('formule', fn ($qq) => $qq->where('id_salle', $staff->id_salle));
+            })
+            ->when($request->string('statut')->toString(), fn ($q, $statut) => $q->where('statut', $statut))
+            ->orderByDesc('date_fin')
+            ->paginate($request->integer('par_page', 20));
+
+        return response()->json($abonnements);
+    }
+
+    /**
+     * Renouvellement manuel par le staff (ex. paiement espèces sur
+     * place) — repousse date_fin d'une durée de formule et réactive.
+     */
+    public function renouveler(Request $request, \App\Models\Abonnement $abonnement)
+    {
+        abort_unless($request->user()->hasAnyRole(['gerant', 'super_admin']), 403);
+        $staff = $request->user()->staff;
+        abort_unless(
+            $request->user()->hasRole('super_admin') || $abonnement->salle()?->id_salle === $staff->id_salle,
+            403
+        );
+
+        $abonnement->update([
+            'date_debut' => now(),
+            'date_fin' => now()->addDays($abonnement->formule->duree_jours),
+            'statut' => 'actif',
+        ]);
+
+        return response()->json($abonnement->fresh(['formule.salle']));
+    }
 }

@@ -16,6 +16,10 @@ use App\Http\Controllers\Staff\AbonnementAdminController;
 use App\Http\Controllers\Webhooks\MobileMoneyWebhookController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\JournalAuditController;
+use App\Http\Controllers\PaiementController;
+use App\Http\Controllers\Staff\SalleAdminController;
+use App\Http\Controllers\Staff\UtilisateurAdminController;
 
 Route::get('/user', function (Request $request) {
     return [

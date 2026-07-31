@@ -98,4 +98,53 @@ class ReservationController extends Controller
 
         return response()->json(['message' => 'Reservation annulee.']);
     }
+
+    /**
+     * Vue admin/staff de toutes les réservations de la salle (distinct
+     * de mesReservations, qui ne montre que celles de l'adhérent connecté).
+     */
+    public function indexAdmin(Request $request)
+    {
+        abort_unless($request->user()->hasAnyRole(['coach', 'gerant', 'super_admin']), 403);
+        $staff = $request->user()->staff;
+
+        $reservations = Reservation::query()
+            ->with(['adherent.utilisateur', 'cours.salle'])
+            ->when(! $request->user()->hasRole('super_admin'), function ($q) use ($staff) {
+                $q->whereHas('cours', fn ($qq) => $qq->where('id_salle', $staff->id_salle));
+            })
+            ->when($request->string('statut')->toString(), fn ($q, $s) => $q->where('statut_reservation', $s))
+            ->orderByDesc('date_reservation')
+            ->paginate($request->integer('par_page', 20));
+
+        return response()->json($reservations);
+    }
+
+    /**
+     * Annulation côté staff (distincte de annuler(), réservée à
+     * l'adhérent propriétaire) — même logique de promotion automatique
+     * de la liste d'attente.
+     */
+    public function annulerParStaff(Request $request, Reservation $reservation)
+    {
+        abort_unless($request->user()->hasAnyRole(['coach', 'gerant', 'super_admin']), 403);
+        abort_if($reservation->statut_reservation === 'annulee', 422, 'Deja annulee.');
+
+        DB::transaction(function () use ($reservation) {
+            $etaitConfirmee = $reservation->statut_reservation === 'confirmee';
+            $reservation->update(['statut_reservation' => 'annulee']);
+
+            if ($etaitConfirmee) {
+                $premierEnAttente = Reservation::where('id_cours', $reservation->id_cours)
+                    ->where('statut_reservation', 'liste_attente')
+                    ->oldest('date_reservation')
+                    ->lockForUpdate()
+                    ->first();
+
+                $premierEnAttente?->update(['statut_reservation' => 'confirmee']);
+            }
+        });
+
+        return response()->json(['message' => 'Reservation annulee.']);
+    }
 }
