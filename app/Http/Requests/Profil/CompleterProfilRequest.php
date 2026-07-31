@@ -16,6 +16,7 @@ class CompleterProfilRequest extends FormRequest
         return [
             'nom' => ['required', 'string', 'max:100'],
             'prenom' => ['required', 'string', 'max:100'],
+            'email' => ['nullable', 'email', 'max:150', 'unique:utilisateurs,email,' . $this->user()?->id_utilisateur . ',id_utilisateur'],
             'date_naissance' => ['required', 'date', 'before:today', 'after:1900-01-01'],
             'sexe' => ['required', 'in:homme,femme,autre'],
             'comment_connu' => ['nullable', 'string', 'max:100'],
