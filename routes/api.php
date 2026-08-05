@@ -77,7 +77,32 @@ Route::middleware('auth:sanctum')->group(function () {
     // -- Creation d'abonnement par le staff (adherent present physiquement) --
     Route::get('/staff/adherents/rechercher', [AbonnementAdminController::class, 'rechercherAdherent']);
     Route::post('/staff/abonnements', [AbonnementAdminController::class, 'creer']);
+    // -- Utilisateurs (adherents/staff) --
+    Route::get('/adherents', [UtilisateurAdminController::class, 'adherents']);
+    Route::get('/staff', [UtilisateurAdminController::class, 'staff']);
+    Route::patch('/utilisateurs/{utilisateur}', [UtilisateurAdminController::class, 'basculerStatut']);
+    
+    Route::post('/staff', [UtilisateurAdminController::class, 'creerStaff']);
+    Route::post('/adherents', [UtilisateurAdminController::class, 'creerAdherent']);
+    
+    // -- Abonnements (gestion staff) --
+    Route::get('/abonnements', [AbonnementAdminController::class, 'index']);
+    Route::post('/abonnements/{abonnement}/renouveler', [AbonnementAdminController::class, 'renouveler']);
 
+    // -- Paiements --
+    Route::get('/paiements', [PaiementController::class, 'index']);
+
+    // -- Reservations (vue staff, distincte de /mes-reservations) --
+    Route::get('/reservations', [ReservationController::class, 'indexAdmin']);
+    Route::patch('/reservations/{reservation}', [ReservationController::class, 'annulerParStaff']);
+
+    // -- Salle courante du staff --
+    Route::get('/salle', [SalleAdminController::class, 'show']);
+    Route::patch('/salle', [SalleAdminController::class, 'update']);
+
+    // -- Journal d'audit --
+    Route::get('/journal-audit', [JournalAuditController::class, 'index']);
+    
     // -- Cours & reservations --
     Route::get('/cours', [CoursController::class, 'index']);
     Route::get('/cours/{cours}', [CoursController::class, 'show']);
